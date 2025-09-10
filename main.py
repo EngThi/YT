@@ -50,21 +50,89 @@ async def take_screenshot(page, step_name):
     except Exception as e:
         print(f"⚠️ Erro ao tirar screenshot: {e}")
 
+async def human_navigation(page):
+    """Simula navegação humana básica."""
+    try:
+        # Scroll e movimento básico
+        await page.evaluate("window.scrollBy(0, 300)")
+        await asyncio.sleep(random.uniform(1, 2))
+        
+        await page.evaluate("window.scrollBy(0, -150)")
+        await asyncio.sleep(random.uniform(0.5, 1.5))
+        
+        # Movimento do mouse
+        await page.evaluate("""
+            document.dispatchEvent(new MouseEvent('mousemove', {
+                clientX: Math.random() * window.innerWidth,
+                clientY: Math.random() * window.innerHeight
+            }));
+        """)
+        await asyncio.sleep(random.uniform(0.5, 1))
+        
+    except Exception as e:
+        print(f"⚠️ Erro na navegação: {e}")
+
 async def human_typing(page, element, text):
-    """Simula digitação humana com delays aleatórios"""
-    await element.click()
-    await asyncio.sleep(random.uniform(0.5, 1.0))
-    
-    # Limpa o campo primeiro
-    await element.clear()
-    await asyncio.sleep(random.uniform(0.3, 0.8))
-    
-    # Digita caractere por caractere
-    for char in text:
-        await element.send_keys(char)
-        await asyncio.sleep(random.uniform(0.05, 0.15))
-    
-    await asyncio.sleep(random.uniform(0.5, 1.5))
+    """Simula digitação humana com validação."""
+    try:
+        if element is None:
+            print("❌ Elemento é None")
+            return False
+        
+        # Clicar no elemento
+        try:
+            click_result = element.click()
+            if asyncio.iscoroutine(click_result):
+                click_result = await click_result
+        except Exception as click_error:
+            print(f"❌ Erro no clique: {click_error}")
+            return False
+            
+        await asyncio.sleep(random.uniform(0.5, 1.0))
+        
+        # Limpar campo - método melhorado
+        try:
+            # Método 1: Triplo clique para seleção
+            for _ in range(3):
+                click_result = element.click()
+                if asyncio.iscoroutine(click_result):
+                    await click_result
+                await asyncio.sleep(0.1)
+            
+            # Método 2: Ctrl+A para seleção total
+            for _ in range(2):
+                select_result = element.send_keys('\u0001')  # Ctrl+A
+                if asyncio.iscoroutine(select_result):
+                    await select_result
+                await asyncio.sleep(0.1)
+            
+            # Método 3: Backspace extensivo
+            for _ in range(50):
+                backspace_result = element.send_keys('\u0008')  # Backspace
+                if asyncio.iscoroutine(backspace_result):
+                    await backspace_result
+                await asyncio.sleep(0.01)
+                
+            await asyncio.sleep(0.5)
+            
+        except Exception as clear_error:
+            print(f"⚠️ Erro na limpeza: {clear_error}")
+        
+        # Digitar texto
+        for char in text:
+            try:
+                send_result = element.send_keys(char)
+                if asyncio.iscoroutine(send_result):
+                    await send_result
+                await asyncio.sleep(random.uniform(0.05, 0.15))
+            except Exception as char_error:
+                print(f"⚠️ Erro ao digitar '{char}': {char_error}")
+                continue
+        
+        return True
+    except Exception as e:
+        print(f"❌ Erro na digitação: {e}")
+        return False
 
 async def wait_and_click(page, selector, timeout=10):
     """Aguarda elemento aparecer e clica nele"""
@@ -194,16 +262,37 @@ async def main():
             email_filled = False
             for selector in email_selectors:
                 try:
-                    print(f"🔍 Tentando seletor: {selector}")
-                    # Aguarda o elemento aparecer
                     email_input = await page1.wait_for(selector, timeout=5)
                     if email_input:
                         print(f"✅ Campo de email encontrado: {selector}")
-                        await human_typing(page1, email_input, EMAIL)
-                        email_filled = True
-                        break
+                        
+                        # Verificar valor atual
+                        try:
+                            current_value = await email_input.get_attribute('value')
+                            if current_value:
+                                print(f"⚠️ Campo já contém: '{current_value}' - limpando...")
+                        except:
+                            pass
+                        
+                        success = await human_typing(page1, email_input, EMAIL)
+                        
+                        # Validar resultado
+                        try:
+                            final_value = await email_input.get_attribute('value')
+                            if EMAIL in final_value and len(final_value) <= len(EMAIL) + 5:
+                                print("✅ Email digitado corretamente")
+                            else:
+                                print(f"⚠️ Email incorreto: '{final_value}'")
+                        except:
+                            pass
+                        
+                        if success:
+                            email_filled = True
+                            break
+                    else:
+                        print(f"⚠️ Elemento {selector} retornou None")
                 except Exception as e:
-                    print(f"⚠️ Seletor {selector} falhou: {e}")
+                    print(f"⚠️ Erro com {selector}: {e}")
                     continue
             
             if not email_filled:
@@ -213,11 +302,17 @@ async def main():
                 
                 # Tenta novamente com wait mais longo
                 try:
+                    print("🔍 Tentando buscar qualquer input na página...")
                     email_input = await page1.wait_for("input", timeout=10)
                     if email_input:
                         print("✅ Campo genérico encontrado, tentando usar...")
-                        await human_typing(page1, email_input, EMAIL)
-                        email_filled = True
+                        success = await human_typing(page1, email_input, EMAIL)
+                        if success:
+                            email_filled = True
+                        else:
+                            print("❌ Falha ao digitar no campo genérico")
+                    else:
+                        print("❌ Campo genérico também retornou None")
                 except Exception as e:
                     print(f"❌ Falha definitiva no campo de email: {e}")
                     await take_screenshot(page1, "02c_erro_campo_email")
@@ -227,35 +322,92 @@ async def main():
             
             # Clica em "Next" / "Avançar"
             print("➡️ Clicando em 'Next'...")
-            next_clicked = await wait_and_click(page1, "#identifierNext")
-            if not next_clicked:
-                # Tenta outros seletores
-                next_selectors = ["button[jsname='LgbsSe']", "input[type='submit']", "#next"]
-                for selector in next_selectors:
-                    if await wait_and_click(page1, selector):
-                        break
+            next_clicked = False
             
-            await asyncio.sleep(3)  # Aguarda carregar página de senha
+            # Lista expandida de seletores para o botão Next
+            next_selectors = [
+                "#identifierNext",
+                "button[jsname='LgbsSe']", 
+                "input[type='submit']",
+                "#next",
+                "button:contains('Next')",
+                "button:contains('Avançar')",
+                ".VfPpkd-LgbsSe",
+                "span:contains('Next')",
+                "div[role='button']:contains('Next')",
+                "button[data-idom-class*='submit']"
+            ]
+            
+            for selector in next_selectors:
+                next_clicked = await wait_and_click(page1, selector, timeout=3)
+                if next_clicked:
+                    print(f"✅ Botão Next clicado: {selector}")
+                    break
+                    
+            if not next_clicked:
+                print("⚠️ Tentando Enter no campo de email...")
+                try:
+                    if email_input:
+                        enter_result = email_input.send_keys('\r')
+                        if asyncio.iscoroutine(enter_result):
+                            await enter_result
+                        next_clicked = True
+                        print("✅ Enter enviado")
+                except Exception as e:
+                    print(f"⚠️ Erro no Enter: {e}")
+            
+            if next_clicked:
+                await asyncio.sleep(4)  # Aguarda mais tempo para carregar página de senha
+                
+                # Aguarda especificamente pela página de senha aparecer
+                print("⏳ Aguardando página de senha...")
+                for attempt in range(8):
+                    try:
+                        password_check = await page1.select("input[type='password']")
+                        if password_check:
+                            print(f"✅ Página de senha carregada")
+                            break
+                    except:
+                        pass
+                    await asyncio.sleep(1)
+                else:
+                    print("⚠️ Timeout na página de senha")
+                    
+            else:
+                print("❌ Não foi possível avançar para a página de senha")
+                await take_screenshot(page1, "02c_erro_next_button")
+                
             await take_screenshot(page1, "02e_pagina_senha")
             
             # Preenche senha
             print("🔑 Inserindo senha...")
             password_selectors = [
                 "input[type='password']",
-                "input[name='password']",
-                "#password input"
+                "input[name='password']", 
+                "#password input",
+                "#password",
+                "input[aria-label*='password']",
+                "input[aria-label*='Password']",
+                "input[placeholder*='password']",
+                "input[placeholder*='Password']",
+                "input[autocomplete='current-password']",
+                "input[inputmode='text'][type='password']"
             ]
             
             password_filled = False
             for selector in password_selectors:
                 try:
-                    password_input = await page1.select(selector)
+                    password_input = await page1.wait_for(selector, timeout=5)
                     if password_input:
                         print(f"✅ Campo de senha encontrado: {selector}")
-                        await human_typing(page1, password_input, PASSWORD)
-                        password_filled = True
-                        break
+                        success = await human_typing(page1, password_input, PASSWORD)
+                        if success:
+                            password_filled = True
+                            break
+                    else:
+                        print(f"⚠️ Elemento de senha {selector} não encontrado")
                 except Exception as e:
+                    print(f"⚠️ Erro com senha {selector}: {e}")
                     continue
             
             if not password_filled:
