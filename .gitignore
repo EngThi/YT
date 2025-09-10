@@ -1,6 +1,9 @@
 # Arquivos de credenciais
 .env
 
+# Screenshots temporários (auto-removidos)
+temp_screenshots/
+
 # Cache Python
 __pycache__/
 *.py[cod]

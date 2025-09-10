@@ -2,79 +2,86 @@
 
 Este projeto implementa uma automação stealth robusta para o YouTube usando **Nodriver** (Python) no ambiente **GitHub Codespaces**.
 
-## 🚀 Configuração Inicial
+## 🚀 Status do Projeto
 
-### 1. Configure suas credenciais
+✅ **Configuração corrigida!** O arquivo `devcontainer.json` foi reparado e o ambiente está funcional.
 
-1. Copie o arquivo de exemplo:
-   ```bash
-   cp .env.example .env
-   ```
+## 🔧 Configuração Atual
 
-2. Edite o arquivo `.env` com suas credenciais reais:
-   ```
-   YOUTUBE_EMAIL=seu.email@gmail.com
-   YOUTUBE_PASSWORD=suaSenhaSegura
-   ```
+O projeto está configurado para:
+- ✅ Acessar **YouTube diretamente** (sem login do Google)
+- ✅ Rodar em **modo headless** (adequado para Codespaces)
+- ✅ Usar **Chromium** instalado no container Alpine Linux
+- ✅ **Navegação stealth** com movimentos humanos simulados
+- ✅ **Múltiplas abas** para navegação avançada
 
-### 2. Rebuild do Container
+## 🛠️ Como Usar
 
-Como o arquivo `devcontainer.json` foi corrigido, você precisa reconstruir o container:
+### 1. Reconstruir o Container (Necessário!)
+
+Como o arquivo `devcontainer.json` foi corrigido, você **DEVE** reconstruir o container:
 
 1. Abra a **Command Palette** (`Ctrl+Shift+P` ou `Cmd+Shift+P`)
 2. Digite e selecione: `Codespaces: Rebuild Container`
 3. Aguarde a reconstrução completa
 
-### 3. Execução
+### 2. Configuração Opcional de Credenciais
 
-Após o rebuild, execute o script:
+Se quiser usar login (opcional):
+```bash
+cp .env.example .env
+# Edite .env com suas credenciais reais
+```
+
+### 3. Execução
 
 ```bash
 python main.py
 ```
 
-## 🛡️ Recursos de Furtividade
+## � Ambiente Recovery
 
-- **Fingerprint realista**: Simula Windows com hardware Intel
-- **Digitação humana**: Delays aleatórios entre caracteres
-- **Movimentos de mouse**: Simulação de navegação natural
-- **Sessão persistente**: Mantém cookies e configurações
-- **Múltiplas abas**: Navegação simultânea
+**Nota importante**: Como estamos em um container de recovery, algumas funcionalidades podem ser limitadas. Para melhor experiência:
+
+1. **Rebuild o container** como indicado acima
+2. **Use o ambiente Python 3.11** configurado no devcontainer.json
+3. **As dependências serão instaladas automaticamente** após o rebuild
 
 ## 📁 Estrutura do Projeto
 
 ```
 ├── .devcontainer/
-│   └── devcontainer.json    # Configuração do ambiente
-├── .env.example             # Modelo de credenciais
-├── .env                     # Suas credenciais (não versionado)
-├── .gitignore              # Arquivos ignorados pelo Git
-├── main.py                 # Script principal
+│   └── devcontainer.json    # ✅ CORRIGIDO - Configuração do ambiente
+├── .env.example             # Modelo de credenciais (opcional)
+├── .gitignore              # Proteção de arquivos sensíveis
+├── main.py                 # ✅ Script principal (YouTube direto)
 ├── requirements.txt        # Dependências Python
 └── README.md              # Este arquivo
 ```
 
-## ⚡ Funcionalidades
+## 🎯 Funcionalidades Implementadas
 
-- ✅ Login automático no YouTube
-- ✅ Abertura de múltiplas abas
-- ✅ Pesquisa automática
-- ✅ Simulação de comportamento humano
-- ✅ Resistência à detecção
+- ✅ **Acesso direto ao YouTube** (sem Google accounts)
+- ✅ **Navegação stealth** com scrolls aleatórios
+- ✅ **Múltiplas abas** (página principal + trending)
+- ✅ **Configuração para container** (headless + no-sandbox)
+- ✅ **Tratamento de erros** robusto
+- ✅ **Logs informativos** para debug
+
+## 🐛 Troubleshooting
+
+**Se encontrar erros:**
+
+1. **Primeiro**: Rebuild o container (comando acima)
+2. **Dependências**: `pip install --break-system-packages -r requirements.txt`
+3. **Chromium**: `sudo apk add chromium chromium-chromedriver`
 
 ## 🔒 Segurança
 
-- Credenciais protegidas no arquivo `.env`
+- Credenciais protegidas no arquivo `.env` (opcional)
 - Arquivo `.gitignore` configurado
 - Dados do perfil não versionados
 
-## 📝 Próximos Passos
-
-1. **Configure suas credenciais** no arquivo `.env`
-2. **Rebuild o container** usando o comando do Codespaces
-3. **Execute o script** e observe a automação funcionando
-4. **Personalize** as ações conforme sua necessidade
-
 ---
 
-**⚠️ Importante**: Use esta automação responsavelmente e respeitando os termos de serviço do YouTube.
+**🎉 Projeto pronto para uso!** Após o rebuild do container, execute `python main.py` e observe a automação funcionando.
