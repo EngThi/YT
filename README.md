@@ -56,6 +56,8 @@ python main.py
 ├── .gitignore              # Proteção de arquivos sensíveis
 ├── main.py                 # ✅ Script principal (YouTube direto)
 ├── requirements.txt        # Dependências Python
+├── cleanup_screenshots.sh  # 🧹 Script de limpeza manual
+├── temp_screenshots/       # 📸 Screenshots temporários (auto-removidos)
 └── README.md              # Este arquivo
 ```
 
@@ -67,6 +69,32 @@ python main.py
 - ✅ **Configuração para container** (headless + no-sandbox)
 - ✅ **Tratamento de erros** robusto
 - ✅ **Logs informativos** para debug
+- 📸 **Screenshots temporários** em pontos essenciais
+- 🧹 **Auto-limpeza** de screenshots (5 minutos)
+
+### 📸 Sistema de Screenshots Temporários
+
+O script agora tira screenshots automáticos nos pontos essenciais:
+
+1. **Acesso inicial** ao YouTube
+2. **Verificação de login** (logado/não logado)
+3. **Após navegação** humana
+4. **Segunda aba** (trending)
+5. **Navegação final**
+
+**🛡️ Proteção de Armazenamento:**
+- Screenshots são **automaticamente removidos** após 5 minutos
+- Limpeza no **início** e **fim** de cada execução
+- Script manual: `./cleanup_screenshots.sh`
+
+### 📋 Pontos Essenciais Monitorados
+
+- ✅ **Inicialização** do browser stealth
+- ✅ **Carregamento** da página do YouTube
+- ✅ **Status de login** (detecta se logado ou anônimo)
+- ✅ **Navegação humana** (scrolls, interações)
+- ✅ **Múltiplas abas** funcionando
+- ✅ **Finalização** sem erros
 
 ## 🐛 Troubleshooting
 
@@ -75,6 +103,7 @@ python main.py
 1. **Primeiro**: Rebuild o container (comando acima)
 2. **Dependências**: `pip install --break-system-packages -r requirements.txt`
 3. **Chromium**: `sudo apk add chromium chromium-chromedriver`
+4. **Limpeza manual**: `./cleanup_screenshots.sh` (remove screenshots temporários)
 
 ## 🔒 Segurança
 

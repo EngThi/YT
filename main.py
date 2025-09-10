@@ -50,7 +50,33 @@ async def take_screenshot(page, step_name):
     except Exception as e:
         print(f"⚠️ Erro ao tirar screenshot: {e}")
 
-async def human_navigation(page):
+async def human_typing(page, element, text):
+    """Simula digitação humana com delays aleatórios"""
+    await element.click()
+    await asyncio.sleep(random.uniform(0.5, 1.0))
+    
+    # Limpa o campo primeiro
+    await element.clear()
+    await asyncio.sleep(random.uniform(0.3, 0.8))
+    
+    # Digita caractere por caractere
+    for char in text:
+        await element.send_keys(char)
+        await asyncio.sleep(random.uniform(0.05, 0.15))
+    
+    await asyncio.sleep(random.uniform(0.5, 1.5))
+
+async def wait_and_click(page, selector, timeout=10):
+    """Aguarda elemento aparecer e clica nele"""
+    try:
+        element = await page.wait_for(selector, timeout=timeout)
+        if element:
+            await asyncio.sleep(random.uniform(0.5, 1.5))
+            await element.click()
+            return True
+    except Exception as e:
+        print(f"⚠️ Elemento {selector} não encontrado: {e}")
+    return False
     """Simula movimentos e ações humanas"""
     await asyncio.sleep(random.uniform(1, 3))
     # Simula scroll aleatório
@@ -98,27 +124,173 @@ async def main():
         # Screenshot do acesso inicial
         await take_screenshot(page1, "01_youtube_inicial")
         
-        # PONTO ESSENCIAL 2: Verificação de login (se necessário)
-        print("🔐 PASSO 2: Verificando status de login...")
-        try:
-            # Verifica se há botão de login na página
-            login_button = await page1.select("a[aria-label*='Sign in']")
-            if login_button:
-                print("👤 Status: Usuário não logado")
-                await take_screenshot(page1, "02_nao_logado")
+        # PONTO ESSENCIAL 2: Processo de Login
+        print("🔐 PASSO 2: Iniciando processo de login...")
+        
+        if not EMAIL or not PASSWORD:
+            print("❌ ERRO: Credenciais não encontradas!")
+            print("📝 Configure suas credenciais no arquivo .env:")
+            print("   YOUTUBE_EMAIL=seu.email@gmail.com")
+            print("   YOUTUBE_PASSWORD=suaSenhaSegura")
+            await take_screenshot(page1, "02_erro_credenciais")
+            return
+        
+        print(f"👤 Fazendo login com: {EMAIL}")
+        
+        # Procura pelo botão Sign In
+        print("🔍 Procurando botão 'Sign in'...")
+        sign_in_clicked = False
+        
+        # Tenta vários seletores para o botão Sign in
+        sign_in_selectors = [
+            "a[aria-label*='Sign in']",
+            "a[href*='accounts.google.com']",
+            "button[aria-label*='Sign in']",
+            "tp-yt-paper-button[aria-label*='Sign in']",
+            "#sign-in-button",
+            "a[href*='ServiceLogin']"
+        ]
+        
+        for selector in sign_in_selectors:
+            try:
+                sign_in_button = await page1.select(selector)
+                if sign_in_button:
+                    print(f"✅ Botão Sign in encontrado: {selector}")
+                    await take_screenshot(page1, "02a_botao_sign_in_encontrado")
+                    
+                    await sign_in_button.click()
+                    await asyncio.sleep(3)  # Aguarda redirecionamento
+                    sign_in_clicked = True
+                    break
+            except Exception as e:
+                continue
+        
+        if not sign_in_clicked:
+            print("⚠️ Botão Sign in não encontrado, tentando acesso direto ao Google...")
+            await page1.get("https://accounts.google.com/ServiceLogin?service=youtube")
+            await asyncio.sleep(3)
+        
+        await take_screenshot(page1, "02b_pagina_login_google")
+        
+        # Verifica se estamos na página de login do Google
+        current_url = await page1.evaluate("window.location.href")
+        print(f"🌐 URL atual: {current_url}")
+        
+        if "accounts.google.com" in current_url:
+            print("📧 Inserindo email...")
+            
+            # Aguarda a página carregar completamente
+            await asyncio.sleep(3)
+            
+            # Aguarda e preenche o campo de email
+            email_selectors = [
+                "input[type='email']",
+                "input#identifierId", 
+                "input[name='identifier']",
+                "#identifierId",
+                "input[aria-label*='email']"
+            ]
+            
+            email_filled = False
+            for selector in email_selectors:
+                try:
+                    print(f"🔍 Tentando seletor: {selector}")
+                    # Aguarda o elemento aparecer
+                    email_input = await page1.wait_for(selector, timeout=5)
+                    if email_input:
+                        print(f"✅ Campo de email encontrado: {selector}")
+                        await human_typing(page1, email_input, EMAIL)
+                        email_filled = True
+                        break
+                except Exception as e:
+                    print(f"⚠️ Seletor {selector} falhou: {e}")
+                    continue
+            
+            if not email_filled:
+                print("❌ Campo de email não encontrado! Tentando aguardar mais...")
+                await asyncio.sleep(5)
+                await take_screenshot(page1, "02c_debug_pagina_completa")
                 
-                # Se credenciais estão disponíveis, pode tentar login
-                if EMAIL and PASSWORD:
-                    print("🔑 Credenciais encontradas, mas mantendo navegação sem login")
-                else:
-                    print("ℹ️ Navegação sem login (modo anônimo)")
+                # Tenta novamente com wait mais longo
+                try:
+                    email_input = await page1.wait_for("input", timeout=10)
+                    if email_input:
+                        print("✅ Campo genérico encontrado, tentando usar...")
+                        await human_typing(page1, email_input, EMAIL)
+                        email_filled = True
+                except Exception as e:
+                    print(f"❌ Falha definitiva no campo de email: {e}")
+                    await take_screenshot(page1, "02c_erro_campo_email")
+                    return
+            
+            await take_screenshot(page1, "02d_email_preenchido")
+            
+            # Clica em "Next" / "Avançar"
+            print("➡️ Clicando em 'Next'...")
+            next_clicked = await wait_and_click(page1, "#identifierNext")
+            if not next_clicked:
+                # Tenta outros seletores
+                next_selectors = ["button[jsname='LgbsSe']", "input[type='submit']", "#next"]
+                for selector in next_selectors:
+                    if await wait_and_click(page1, selector):
+                        break
+            
+            await asyncio.sleep(3)  # Aguarda carregar página de senha
+            await take_screenshot(page1, "02e_pagina_senha")
+            
+            # Preenche senha
+            print("🔑 Inserindo senha...")
+            password_selectors = [
+                "input[type='password']",
+                "input[name='password']",
+                "#password input"
+            ]
+            
+            password_filled = False
+            for selector in password_selectors:
+                try:
+                    password_input = await page1.select(selector)
+                    if password_input:
+                        print(f"✅ Campo de senha encontrado: {selector}")
+                        await human_typing(page1, password_input, PASSWORD)
+                        password_filled = True
+                        break
+                except Exception as e:
+                    continue
+            
+            if not password_filled:
+                print("❌ Campo de senha não encontrado!")
+                await take_screenshot(page1, "02f_erro_campo_senha")
+                return
+            
+            await take_screenshot(page1, "02g_senha_preenchida")
+            
+            # Clica em "Next" / "Entrar"
+            print("🔐 Finalizando login...")
+            login_clicked = await wait_and_click(page1, "#passwordNext")
+            if not login_clicked:
+                # Tenta outros seletores
+                login_selectors = ["button[jsname='LgbsSe']", "input[type='submit']", "#submit"]
+                for selector in login_selectors:
+                    if await wait_and_click(page1, selector):
+                        break
+            
+            # Aguarda redirecionamento para YouTube
+            print("⏳ Aguardando redirecionamento para YouTube...")
+            await asyncio.sleep(5)
+            
+            # Verifica se o login foi bem-sucedido
+            final_url = await page1.evaluate("window.location.href")
+            if "youtube.com" in final_url:
+                print("✅ Login realizado com sucesso!")
+                await take_screenshot(page1, "02h_login_sucesso")
             else:
-                print("✅ Status: Possivelmente logado ou página diferente")
-                await take_screenshot(page1, "02_status_login")
-                
-        except Exception as e:
-            print(f"⚠️ Erro ao verificar login: {e}")
-            await take_screenshot(page1, "02_erro_login")
+                print(f"⚠️ Possível problema no login. URL atual: {final_url}")
+                await take_screenshot(page1, "02i_login_problema")
+        
+        else:
+            print("❌ Não foi possível acessar a página de login do Google")
+            await take_screenshot(page1, "02j_erro_acesso_google")
 
         # PONTO ESSENCIAL 3: Navegação e interação
         print("🧭 PASSO 3: Iniciando navegação humana...")
