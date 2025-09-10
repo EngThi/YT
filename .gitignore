@@ -1,0 +1,26 @@
+# Arquivos de credenciais
+.env
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Dados do perfil do browser
+profile_data/
+
+# Ambiente virtual
+venv/
+env/
+ENV/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
