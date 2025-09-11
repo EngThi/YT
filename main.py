@@ -167,17 +167,7 @@ async def main():
         browser = await uc.start(
             headless=True,
             no_sandbox=True,
-            user_data_dir="profile_data",
-            browser_executable_path="/usr/bin/chromium-browser",
-            browser_args=[
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--remote-debugging-port=0",
-                "--disable-background-timer-throttling",
-                "--disable-backgrounding-occluded-windows",
-                "--disable-renderer-backgrounding"
-            ]
+            user_data_dir="profile_data"
         )
         print("✅ Browser iniciado com sucesso!")
 
