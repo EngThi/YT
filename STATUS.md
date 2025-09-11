@@ -27,7 +27,7 @@
 - Headers ou comportamento suspeito detectado
 
 **PROBLEMA ANTERIOR (RESOLVIDO PARCIALMENTE):**
-- Campo de email: "Thiagao15@thiago.edu511@gmail.com" 
+- Campo de email: "" 
 - Erro: "Enter a valid email or phone number"
 - Limpeza melhorada mas Google bloqueou antes de testar
 
