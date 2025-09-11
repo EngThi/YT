@@ -5,12 +5,14 @@ Monitoring System - Sistema de Monitoramento Avançado
 Sistema de monitoramento com métricas, health checks e alertas.
 """
 
-import time
-import psutil
 import asyncio
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Any, Dict, List
+
+import psutil
+
 from .logger import get_logger
 
 

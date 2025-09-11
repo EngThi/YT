@@ -5,15 +5,16 @@ Credential Manager - Gestão Segura de Credenciais
 Sistema seguro para gerenciamento de credenciais com criptografia.
 """
 
-import os
 import base64
+import getpass
 import json
-from typing import Optional, Dict, Any
+import os
+from typing import Dict, Optional
+
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from dotenv import load_dotenv
-import getpass
 
 
 class CredentialManager:

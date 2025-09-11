@@ -7,7 +7,6 @@ Sistema avançado de login com múltiplas estratégias e detecção inteligente.
 
 import asyncio
 import random
-from typing import Optional, Dict, Any, List
 from enum import Enum
 
 from ..automation.human_simulator import HumanBehaviorSimulator

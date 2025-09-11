@@ -5,15 +5,15 @@ Screenshot Manager - Gerenciador Avançado de Screenshots
 Sistema avançado para captura, organização e análise de screenshots.
 """
 
+import hashlib
 import os
 import time
-import hashlib
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass
+from typing import Any, Dict, List, Tuple
+
 from PIL import Image, ImageDraw, ImageFont
-import base64
 
 from .logger import get_logger
 

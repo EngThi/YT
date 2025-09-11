@@ -7,20 +7,22 @@ Refatorado para usar Playwright com máxima compatibilidade em containers.
 """
 
 import asyncio
-import os
 import json
+import os
 import random
-from typing import Optional, Dict, Any, List
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 try:
-    from playwright.async_api import async_playwright, Browser, Page, BrowserContext
+    from playwright.async_api import (Browser, BrowserContext, Page,
+                                      async_playwright)
     from playwright_stealth import stealth_async
 except ImportError:
     print("⚠️  Playwright não encontrado. Execute: pip install playwright playwright-stealth")
     async_playwright = None
 
-from ..security.fingerprint_spoofing import AdvancedStealthEngine, ContextRotator
+from ..security.fingerprint_spoofing import (AdvancedStealthEngine,
+                                             ContextRotator)
 
 
 class BrowserManager:

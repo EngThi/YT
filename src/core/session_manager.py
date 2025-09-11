@@ -6,15 +6,14 @@ Sistema avançado para gerenciamento de sessões com persistência e recuperaç�
 """
 
 import json
-import pickle
 import time
 import uuid
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional
+
 from cryptography.fernet import Fernet
-import base64
 
 from ..utils.logger import get_logger
 

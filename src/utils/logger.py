@@ -5,16 +5,14 @@ Logger - Sistema de Logs Estruturado
 Sistema avançado de logging com múltiplos níveis e formatação estruturada.
 """
 
+import json
 import logging
 import logging.handlers
-import json
-import os
 import sys
-import asyncio
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, Any, Optional
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict
 
 
 class LogLevel(Enum):

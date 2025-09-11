@@ -6,12 +6,12 @@ Sistema centralizado de configurações para o projeto.
 """
 
 import json
-import yaml
-import os
-from pathlib import Path
-from typing import Dict, Any, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Optional
+
+import yaml
 
 
 class LogLevel(Enum):

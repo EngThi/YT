@@ -6,17 +6,15 @@ Automator principal que integra todos os componentes modularizados.
 """
 
 import asyncio
-import os
 import random
-from typing import Dict, Any, Optional
-from pathlib import Path
+from typing import Any, Dict
 
-from ..core.browser_manager import BrowserManager
-from ..automation.login_handler import YouTubeLoginHandler
 from ..automation.human_simulator import HumanBehaviorSimulator
-from ..utils.screenshot_manager import ScreenshotManager
-from ..utils.logger import AutomationLogger
+from ..automation.login_handler import YouTubeLoginHandler
+from ..core.browser_manager import BrowserManager
 from ..utils.config import ConfigManager
+from ..utils.logger import AutomationLogger
+from ..utils.screenshot_manager import ScreenshotManager
 
 
 class YouTubeAutomator:

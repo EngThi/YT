@@ -5,10 +5,9 @@ Human Behavior Simulator - Simulação de Comportamento Humano
 Simula padrões realistas de comportamento humano para evitar detecção.
 """
 
-import random
 import asyncio
 import math
-from typing import Tuple, List, Optional
+import random
 import time
 
 
