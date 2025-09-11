@@ -1,0 +1,116 @@
+# Docker Compose para YouTube Automation
+# Suporte a múltiplos ambientes de execução
+
+version: '3.8'
+
+services:
+  # Ambiente de desenvolvimento
+  yt-automation-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: yt-automation-dev
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - DISPLAY=:99
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+      - ./browser_profiles:/app/browser_profiles
+      - ./config:/app/config
+    ports:
+      - "5900:5900"  # VNC para debug visual
+    networks:
+      - yt-automation-network
+    profiles:
+      - dev
+
+  # Ambiente de produção
+  yt-automation-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: yt-automation-prod
+    environment:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - HEADLESS=true
+    volumes:
+      - ./logs:/app/logs
+      - ./browser_profiles:/app/browser_profiles
+      - ./config:/app/config
+    restart: unless-stopped
+    networks:
+      - yt-automation-network
+    profiles:
+      - prod
+
+  # Ambiente de testes
+  yt-automation-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: yt-automation-test
+    environment:
+      - ENVIRONMENT=test
+      - LOG_LEVEL=WARNING
+    volumes:
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+    command: ["python", "-m", "pytest", "tests/", "-v"]
+    networks:
+      - yt-automation-network
+    profiles:
+      - test
+
+  # VNC Server para debug visual
+  vnc-server:
+    image: dorowu/ubuntu-desktop-lxde-vnc:focal
+    container_name: yt-automation-vnc
+    environment:
+      - VNC_PASSWORD=automation123
+    ports:
+      - "6080:80"  # Web VNC
+      - "5901:5900" # VNC
+    volumes:
+      - /dev/shm:/dev/shm
+    networks:
+      - yt-automation-network
+    profiles:
+      - debug
+
+  # Proxy para rotação de IP (opcional)
+  proxy-rotator:
+    image: haproxy:2.4
+    container_name: yt-automation-proxy
+    volumes:
+      - ./docker/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - "8080:8080"
+    networks:
+      - yt-automation-network
+    profiles:
+      - proxy
+
+  # Redis para cache de sessões (opcional)
+  redis-cache:
+    image: redis:7-alpine
+    container_name: yt-automation-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - yt-automation-network
+    profiles:
+      - cache
+
+networks:
+  yt-automation-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local

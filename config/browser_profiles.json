@@ -1,0 +1,43 @@
+{
+  "profiles": [
+    {
+      "name": "Windows_Chrome_118",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "platform": "Win32",
+      "language": "pt-BR,pt;q=0.9,en;q=0.8",
+      "timezone": "America/Sao_Paulo",
+      "webgl_vendor": "Google Inc. (Intel)",
+      "webgl_renderer": "ANGLE (Intel, Intel(R) HD Graphics 620 Direct3D11 vs_5_0 ps_5_0, D3D11)"
+    },
+    {
+      "name": "Windows_Chrome_117",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "platform": "Win32",
+      "language": "pt-BR,pt;q=0.9,en;q=0.8",
+      "timezone": "America/Sao_Paulo",
+      "webgl_vendor": "Google Inc. (NVIDIA)",
+      "webgl_renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1060 6GB Direct3D11 vs_5_0 ps_5_0, D3D11)"
+    },
+    {
+      "name": "macOS_Chrome_118",
+      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "platform": "MacIntel",
+      "language": "pt-BR,pt;q=0.9,en;q=0.8",
+      "timezone": "America/Sao_Paulo",
+      "webgl_vendor": "Apple Inc.",
+      "webgl_renderer": "Apple GPU"
+    }
+  ]
+}

@@ -1,2 +1,20 @@
-nodriver
-python-dotenv
+# Dependências Principais
+nodriver>=0.30
+python-dotenv>=1.0.0
+
+# Segurança e Criptografia
+cryptography>=41.0.0
+
+# Configuração e Serialização
+pyyaml>=6.0
+pydantic>=2.0.0
+
+# Desenvolvimento e Testes
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Utilidades
+rich>=13.0.0  # Para output colorido e formatado
+click>=8.0.0  # Para CLI avançada

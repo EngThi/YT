@@ -1,0 +1,37 @@
+app_name: YT Automation
+automation:
+  human_simulation: true
+  max_retry_attempts: 3
+  mouse_movement_natural: true
+  random_pauses: true
+  screenshot_enabled: true
+  scroll_simulation: true
+  typing_speed_range: !!python/tuple
+  - 80
+  - 200
+browser:
+  context_rotation: true
+  headless: false
+  language: pt-BR,pt;q=0.9,en;q=0.8
+  stealth_mode: advanced
+  timezone: America/Sao_Paulo
+  user_data_dir: browser_profiles/default
+  viewport_height: 768
+  viewport_width: 1366
+debug_mode: false
+logging:
+  backup_count: 5
+  console_logging: true
+  file_logging: true
+  level: INFO
+  log_file: logs/yt_automation.log
+  max_log_size: 10485760
+security:
+  anti_detection: true
+  clear_cookies_on_exit: false
+  encrypt_credentials: true
+  fingerprint_spoofing: true
+  proxy_url: null
+  session_persistence: true
+  use_proxy: false
+version: 2.0.0

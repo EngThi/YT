@@ -1,0 +1,64 @@
+anti_detection:
+  block_webrtc: true
+  mock_languages: true
+  mock_permissions: true
+  mock_plugins: true
+  remove_webdriver_property: true
+  spoof_canvas: true
+  spoof_webgl: true
+browser_args:
+  advanced:
+  - --disable-blink-features=AutomationControlled
+  - --disable-dev-shm-usage
+  - --disable-extensions-except=uBlock
+  - --disable-plugins-discovery
+  - --disable-default-apps
+  - --no-first-run
+  - --disable-web-security
+  - --disable-features=TranslateUI,VizDisplayCompositor
+  - --disable-ipc-flooding-protection
+  basic:
+  - --disable-blink-features=AutomationControlled
+  - --no-first-run
+  - --disable-dev-shm-usage
+  maximum:
+  - --disable-blink-features=AutomationControlled
+  - --disable-dev-shm-usage
+  - --disable-extensions-except=uBlock
+  - --disable-plugins-discovery
+  - --disable-default-apps
+  - --no-first-run
+  - --disable-web-security
+  - --allow-running-insecure-content
+  - --disable-features=TranslateUI,VizDisplayCompositor
+  - --disable-ipc-flooding-protection
+  - --disable-renderer-backgrounding
+  - --disable-backgrounding-occluded-windows
+  - --disable-field-trial-config
+  - --disable-background-timer-throttling
+  - --disable-hang-monitor
+  - --disable-prompt-on-repost
+  - --disable-sync
+  - --metrics-recording-only
+  - --no-report-upload
+  - --disable-domain-reliability
+  - --disable-component-extensions-with-background-pages
+human_behavior:
+  mouse_movement:
+    acceleration: 0.8
+    curve_intensity: 0.3
+    deceleration: 0.6
+    speed: 1.5
+  scroll_patterns:
+    back_scroll_chance: 0.1
+    pause_range:
+    - 200
+    - 800
+    speed_range:
+    - 100
+    - 300
+  typing_delays:
+    correction_chance: 0.03
+    max: 200
+    min: 80
+    pause_chance: 0.05
