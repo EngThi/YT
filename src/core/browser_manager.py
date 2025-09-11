@@ -3,6 +3,7 @@ Browser Manager - Gerenciamento Stealth do Browser
 ==================================================
 
 Gerenciador avançado de browser com recursos de stealth e anti-detecção.
+Refatorado para usar Playwright com máxima compatibilidade em containers.
 """
 
 import asyncio
@@ -13,21 +14,24 @@ from typing import Optional, Dict, Any, List
 from pathlib import Path
 
 try:
-    import nodriver as uc
+    from playwright.async_api import async_playwright, Browser, Page, BrowserContext
+    from playwright_stealth import stealth_async
 except ImportError:
-    print("⚠️  nodriver não encontrado. Execute: pip install nodriver")
-    uc = None
+    print("⚠️  Playwright não encontrado. Execute: pip install playwright playwright-stealth")
+    async_playwright = None
 
 from ..security.fingerprint_spoofing import AdvancedStealthEngine, ContextRotator
 
 
 class BrowserManager:
-    """Gerenciador avançado de browser stealth"""
+    """Gerenciador avançado de browser stealth com Playwright"""
     
     def __init__(self, profile_name: str = "default"):
         self.profile_name = profile_name
-        self.browser = None
-        self.page = None
+        self.playwright = None
+        self.browser: Optional[Browser] = None
+        self.context: Optional[BrowserContext] = None
+        self.page: Optional[Page] = None
         self.stealth_engine = AdvancedStealthEngine()
         self.context_rotator = ContextRotator()
         self.profile_dir = self._get_profile_directory()
@@ -38,13 +42,13 @@ class BrowserManager:
         profiles_dir.mkdir(exist_ok=True)
         return str(profiles_dir / self.profile_name)
     
-    async def launch_stealth_browser(self, headless: bool = False, 
+    async def launch_stealth_browser(self, headless: bool = True, 
                                    context_rotation: bool = True) -> tuple:
-        """Lança browser com máxima furtividade"""
+        """Lança browser com máxima furtividade usando Playwright"""
         
         try:
-            if uc is None:
-                raise ImportError("nodriver não está disponível")
+            if async_playwright is None:
+                raise ImportError("Playwright não está disponível")
             
             # Seleciona contexto (rotação ou aleatório)
             if context_rotation:
@@ -54,54 +58,67 @@ class BrowserManager:
                 profile_dir = self.profile_dir
             
             # Configurações stealth do browser
-            stealth_args = self.stealth_engine.get_stealth_browser_args()
             fingerprint = await self.stealth_engine.setup_realistic_browser()
             
-            # Argumentos customizados para máxima furtividade
-            custom_args = [
-                f'--user-agent={fingerprint["user_agent"]}',
-                f'--window-size={fingerprint["viewport"]["width"]},{fingerprint["viewport"]["height"]}',
+            print(f"🚀 Lançando browser stealth com Playwright (Profile: {profile_dir})")
+            
+            # Inicia Playwright
+            self.playwright = await async_playwright().start()
+            
+            # Argumentos customizados para máxima furtividade em containers
+            browser_args = [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
                 '--disable-web-security',
                 '--disable-features=VizDisplayCompositor',
                 '--disable-extensions',
                 '--disable-plugins',
-                '--disable-images',  # Melhora performance
-                '--disable-javascript-harmony-shipping',
-                '--disable-client-side-phishing-detection',
                 '--disable-sync',
-                '--disable-background-networking',
-                '--metrics-recording-only',
                 '--disable-default-apps',
+                '--disable-background-networking',
+                '--disable-client-side-phishing-detection',
                 '--mute-audio',
+                '--no-first-run',
+                '--disable-gpu',
+                '--disable-software-rasterizer'
             ]
             
-            all_args = stealth_args + custom_args
-            
-            print(f"🚀 Lançando browser stealth (Profile: {profile_dir})")
-            
-            # Lança browser
-            self.browser = await uc.start(
+            # Lança browser Chromium
+            self.browser = await self.playwright.chromium.launch(
                 headless=headless,
-                user_data_dir=profile_dir,
-                args=all_args
+                args=browser_args,
+                chromium_sandbox=False
             )
             
-            # Obtém página principal
-            self.page = await self.browser.get('about:blank')
+            # Cria contexto com fingerprint
+            self.context = await self.browser.new_context(
+                user_agent=fingerprint["user_agent"],
+                viewport={
+                    'width': fingerprint["viewport"]["width"],
+                    'height': fingerprint["viewport"]["height"]
+                },
+                locale=fingerprint['language'].split(',')[0],
+                timezone_id=fingerprint['timezone'],
+                geolocation=fingerprint.get('geolocation'),
+                permissions=['geolocation'] if fingerprint.get('geolocation') else []
+            )
             
-            # Aplica scripts de stealth
+            # Cria página
+            self.page = await self.context.new_page()
+            
+            # Aplica stealth
+            await stealth_async(self.page)
+            
+            # Aplica scripts de stealth adicionais
             await self.stealth_engine.inject_stealth_scripts(self.page)
             
-            # Configura fingerprint do browser
-            await self._setup_browser_fingerprint(fingerprint)
-            
-            print("✅ Browser stealth configurado com sucesso")
+            print("✅ Browser stealth Playwright configurado com sucesso")
             return self.browser, self.page
             
         except Exception as e:
-            print(f"❌ Erro ao lançar browser: {e}")
+            print(f"❌ Erro ao lançar browser Playwright: {e}")
+            await self.cleanup()
             raise
     
     async def _setup_browser_fingerprint(self, fingerprint: Dict[str, Any]):
@@ -154,6 +171,21 @@ class BrowserManager:
                 }})
             }});
         """)
+    
+    async def cleanup(self):
+        """Limpa recursos do browser"""
+        try:
+            if self.page:
+                await self.page.close()
+            if self.context:
+                await self.context.close()
+            if self.browser:
+                await self.browser.close()
+            if self.playwright:
+                await self.playwright.stop()
+            print("🧹 Recursos do browser limpos")
+        except Exception as e:
+            print(f"⚠️ Erro na limpeza: {e}")
     
     async def navigate_safely(self, url: str, wait_for: str = "domcontentloaded",
                             timeout: int = 30000) -> bool:
