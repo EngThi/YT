@@ -6,7 +6,7 @@ automation:
   random_pauses: true
   screenshot_enabled: true
   scroll_simulation: true
-  typing_speed_range: !!python/tuple
+  typing_speed_range:
   - 80
   - 200
 browser:

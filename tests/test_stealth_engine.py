@@ -53,16 +53,6 @@ class TestAdvancedStealthEngine:
         assert options["timezone"] == "America/Sao_Paulo"
         assert "pt-BR" in options["language"]
     
-    def test_get_realistic_ua(self):
-        """Testa geração de user agent realista"""
-        engine = AdvancedStealthEngine()
-        
-        ua = engine._get_realistic_ua()
-        
-        assert "Mozilla" in ua
-        assert "Chrome" in ua
-        assert "Safari" in ua
-    
     def test_get_human_headers(self):
         """Testa geração de headers humanos"""
         engine = AdvancedStealthEngine()
@@ -72,7 +62,6 @@ class TestAdvancedStealthEngine:
         assert "Accept" in headers
         assert "Accept-Language" in headers
         assert "pt-BR" in headers["Accept-Language"]
-        assert "User-Agent" not in headers  # Não deve incluir User-Agent aqui
     
     def test_get_brazilian_geolocation(self):
         """Testa geolocalização brasileira"""

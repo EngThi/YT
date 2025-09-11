@@ -9,6 +9,10 @@ cryptography>=41.0.0
 pyyaml>=6.0
 pydantic>=2.0.0
 
+# Sistema e Monitoramento
+psutil>=5.9.0
+Pillow>=10.0.0
+
 # Desenvolvimento e Testes
 pytest>=7.0.0
 pytest-asyncio>=0.21.0
